@@ -46,6 +46,7 @@ class mod_zoom_mod_form extends moodleform_mod {
     public function definition() {
         global $PAGE, $USER;
         $config = get_config('mod_zoom');
+        $PAGE->requires->js_call_amd("mod_zoom/form", 'init');
         $service = new mod_zoom_webservice();
         $zoomuser = $service->get_user($USER->email);
         if ($zoomuser === false) {
@@ -122,11 +123,21 @@ class mod_zoom_mod_form extends moodleform_mod {
         }
 
         // Add password.
-        $mform->addElement('passwordunmask', 'password', get_string('password', 'zoom'), array('maxlength' => '10'));
+        $mform->addElement('text', 'password', get_string('password', 'zoom'), array('maxlength' => '10'));
         // Check password uses valid characters.
         $regex = '/^[a-zA-Z0-9@_*-]{1,10}$/';
         $mform->addRule('password', get_string('err_password', 'mod_zoom'), 'regex', $regex, 'client');
+        $mform->setDefault('password', strval(rand(100000, 999999)));
         $mform->disabledIf('password', 'webinar', 'checked');
+        $mform->disabledIf('password', 'requirepassword', 'notchecked');
+
+        // Add password requirement prompt.
+        $mform->addElement('advcheckbox', 'requirepassword', get_string('requirepassword', 'zoom'));
+        if (!is_null($this->current->password) && strval($this->current->password) === "") {
+            $mform->setDefault('requirepassword', 0);
+        } else {
+            $mform->setDefault('requirepassword', 1);
+        }
 
         // Add host/participants video (checked by default).
         $mform->addGroup(array(
@@ -212,6 +223,10 @@ class mod_zoom_mod_form extends moodleform_mod {
             } else if ($data['duration'] > 150 * 60 * 60) {
                 $errors['duration'] = get_string('err_duration_too_long', 'zoom');
             }
+        }
+
+        if (!is_null($data["requirepassword"]) && strval($data["requirepassword"]) == "1" && !is_null($data["password"]) && strval($data["password"]) == "") {
+            $errors['password'] = get_string('err_password_required', 'zoom');
         }
 
         // Check if the listed alternative hosts are valid users on Zoom.

@@ -68,6 +68,9 @@ function zoom_supports($feature) {
 function zoom_add_instance(stdClass $zoom, mod_zoom_mod_form $mform = null) {
     global $CFG, $DB;
     require_once($CFG->dirroot.'/mod/zoom/classes/webservice.php');
+    if (!is_null($zoom->requirepassword) && strval($zoom->requirepassword) === "0") {
+        $zoom->password = "";
+    }
 
     $zoom->course = (int) $zoom->course;
 
@@ -100,6 +103,9 @@ function zoom_update_instance(stdClass $zoom, mod_zoom_mod_form $mform = null) {
     // The object received from mod_form.php returns instance instead of id for some reason.
     $zoom->id = $zoom->instance;
     $zoom->timemodified = time();
+    if (!is_null($zoom->requirepassword) && strval($zoom->requirepassword) === "0") {
+        $zoom->password = "";
+    }
     $DB->update_record('zoom', $zoom);
 
     $updatedzoomrecord = $DB->get_record('zoom', array('id' => $zoom->instance));
