@@ -175,8 +175,12 @@ class mod_zoom_webservice {
                 case 404:
                     throw new zoom_not_found_exception($response->message);
                 default:
-                    if ($response) {
-                        throw new moodle_exception('errorwebservice', 'mod_zoom', '', $response->message);
+		    if ($response) {
+                        if ($response->code = 1001) {
+                            throw new moodle_exception('errornotregistered', 'mod_zoom', '', $response->message);
+                        } else {
+                            throw new moodle_exception('errorwebservice', 'mod_zoom', '', $response->message);
+                        }
                     } else {
                         throw new moodle_exception('errorwebservice', 'mod_zoom', '', "HTTP Status $httpstatus");
                     }
