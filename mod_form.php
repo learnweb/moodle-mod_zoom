@@ -126,6 +126,9 @@ class mod_zoom_mod_form extends moodleform_mod {
         // Check password uses valid characters.
         $regex = '/^[a-zA-Z0-9@_*-]{1,10}$/';
         $mform->addRule('password', get_string('err_password', 'mod_zoom'), 'regex', $regex, 'client');
+        if ($isnew) {
+            $mform->setDefault('password', $this->randomPassword());
+        }
         $mform->disabledIf('password', 'webinar', 'checked');
 
         // Add host/participants video (checked by default).
@@ -226,6 +229,15 @@ class mod_zoom_mod_form extends moodleform_mod {
         }
 
         return $errors;
+    }
+
+    protected function randomPassword() {
+        $alphabet = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+        $pass = array();
+        for ($i = 0; $i < 10; $i++) {
+            $pass[] = $alphabet[rand(0, strlen($alphabet)-1)];
+        }
+        return implode($pass);
     }
 }
 
