@@ -74,7 +74,11 @@ if (! $zooms = get_all_instances_in_course('zoom', $course)) {
 
 $usesections = course_format_uses_sections($course->format);
 
-$zoomuserid = zoom_get_user_id(false);
+if ($iszoommanager) {
+    $zoomuserid = zoom_get_user_id(false);
+} else {
+    $zoomuserid = false;
+}
 
 $newtable = new html_table();
 $newtable->attributes['class'] = 'generaltable mod_index';

@@ -53,7 +53,7 @@ $PAGE->set_title(format_string($zoom->name));
 $PAGE->set_heading(format_string($course->fullname));
 
 $zoomuserid = false;
-if (has_capability('mod/zoom:addinstance', $context)) {
+if ($iszoommanager) {
     $zoomuserid = zoom_get_user_id(false);
 }
 $alternativehosts = array();

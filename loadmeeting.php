@@ -39,7 +39,6 @@ if ($id) {
 } else {
     print_error('You must specify a course_module ID');
 }
-$userishost = (zoom_get_user_id(false) == $zoom->host_id);
 
 require_login($course, true, $cm);
 
@@ -47,6 +46,12 @@ $context = context_module::instance($cm->id);
 $PAGE->set_context($context);
 
 require_capability('mod/zoom:view', $context);
+if (has_capability('mod/zoom:addinstance', $context)) {
+    $userishost = (zoom_get_user_id(false) == $zoom->host_id);
+} else {
+    $userishost = false;
+}
+
 if ($userishost) {
     $nexturl = new moodle_url($zoom->start_url);
 } else {
