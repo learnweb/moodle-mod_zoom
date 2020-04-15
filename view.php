@@ -52,7 +52,10 @@ $PAGE->set_url('/mod/zoom/view.php', array('id' => $cm->id));
 $PAGE->set_title(format_string($zoom->name));
 $PAGE->set_heading(format_string($course->fullname));
 
-$zoomuserid = zoom_get_user_id(false);
+$zoomuserid = false;
+if (has_capability('mod/zoom:addinstance', $context)) {
+    $zoomuserid = zoom_get_user_id(false);
+}
 $alternativehosts = array();
 if (!is_null($zoom->alternative_hosts)) {
     $alternativehosts = explode(",", $zoom->alternative_hosts);
