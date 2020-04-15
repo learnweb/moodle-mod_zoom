@@ -61,6 +61,7 @@ $string['err_long_timeframe'] = 'Der angeforderte Zeitrahmen ist zu lang und zei
 $string['err_password'] = 'Das Passwort darf nur die folgenden Zeichen enthalten: [a-z A-Z 0-9 @ - _ *]. Maximal 10 Zeichen.';
 $string['err_start_time_past'] = 'Das Startdatum kann nicht in der Vergangenheit liegen.';
 $string['errorwebservice'] = 'Zoom Webservice Fehler: {$a}.';
+$string['errornotregistered'] = 'Sie sind nicht registriert: Bitte legen Sie sich unter <a href="https://wwu.zoom.us">wwu.zoom.us</a> ein Zoom-Konto an.';
 $string['export'] = 'Exportieren';
 $string['firstjoin'] = 'Frühester Beitrittszeitpunkt';
 $string['firstjoin_desc'] = 'Der früheste Zeitpunkt, wann ein/eine TeilnehmerIn einem geplanten Meeting beitreten kann (Minuten vor Start).';

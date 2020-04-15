@@ -62,6 +62,7 @@ $string['err_password'] = 'Password may only contain the following characters: [
 $string['err_start_time_past'] = 'The start date cannot be in the past.';
 $string['errorwebservice_notfound'] = 'The resource does not exists: {$a}';
 $string['errorwebservice'] = 'Zoom webservice error: {$a}.';
+$string['errornotregistered'] = 'You are not registered: Please register for a Zoom account at <a href="https://wwu.zoom.us">wwu.zoom.us</a>.';
 $string['export'] = 'Export';
 $string['firstjoin'] = 'First able to join';
 $string['firstjoin_desc'] = 'The earliest a user can join a scheduled meeting (minutes before start).';
