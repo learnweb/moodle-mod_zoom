@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<XMLDB PATH="mod/zoom/db" VERSION="20190912" COMMENT="Zoom module"
+<XMLDB PATH="mod/zoom/db" VERSION="20200531" COMMENT="Zoom module"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:noNamespaceSchemaLocation="../../../lib/xmldb/xmldb.xsd"
 >
@@ -56,6 +56,7 @@
         <KEY NAME="id_primary" TYPE="primary" FIELDS="id" COMMENT="Moodle forces us to use id as a primary key. Most database actions will be performed using meeting_webinar_instance_id."/>
         <KEY NAME="meeting_unique" TYPE="unique" FIELDS="meeting_id, uuid"/>
         <KEY NAME="zoomid_foreign" TYPE="foreign" FIELDS="zoomid" REFTABLE="zoom" REFFIELDS="id"/>
+        <KEY NAME="uuid_unique" TYPE="unique" FIELDS="uuid"/>
       </KEYS>
     </TABLE>
     <TABLE NAME="zoom_meeting_participants" COMMENT="A list of each meeting existing on Moodle and when its participants entered/left.">
@@ -80,6 +81,24 @@
       <INDEXES>
         <INDEX NAME="userid" UNIQUE="false" FIELDS="userid"/>
       </INDEXES>
+    </TABLE>
+    <TABLE NAME="zoom_meeting_recordings" COMMENT="Stores the recordings from zoom.">
+      <FIELDS>
+        <FIELD NAME="id" TYPE="int" LENGTH="10" NOTNULL="true" SEQUENCE="true"/>
+        <FIELD NAME="recordingid" TYPE="char" LENGTH="50" NOTNULL="false" SEQUENCE="false"/>
+        <FIELD NAME="meetinguuid" TYPE="char" LENGTH="30" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="recording_start" TYPE="int" LENGTH="11" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="recording_end" TYPE="int" LENGTH="11" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="file_type" TYPE="char" LENGTH="20" NOTNULL="true" SEQUENCE="false"/>
+        <FIELD NAME="recording_type" TYPE="char" LENGTH="50" NOTNULL="false" SEQUENCE="false"/>
+        <FIELD NAME="play_url" TYPE="char" LENGTH="255" NOTNULL="false" SEQUENCE="false"/>
+        <FIELD NAME="download_url" TYPE="char" LENGTH="255" NOTNULL="false" SEQUENCE="false"/>
+      </FIELDS>
+      <KEYS>
+        <KEY NAME="primary" TYPE="primary" FIELDS="id"/>
+        <KEY NAME="meetinguuid_foreign" TYPE="foreign" FIELDS="meetinguuid" REFTABLE="zoom_meeting_details" REFFIELDS="uuid"/>
+        <KEY NAME="recordingid_unique" TYPE="unique" FIELDS="recordingid"/>
+      </KEYS>
     </TABLE>
   </TABLES>
 </XMLDB>

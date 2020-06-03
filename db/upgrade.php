@@ -317,5 +317,44 @@ function xmldb_zoom_upgrade($oldversion) {
         upgrade_mod_savepoint(true, 2019091200, 'zoom');
     }
 
+    if ($oldversion < 2020053100) {
+
+
+        // Define key uuid_unique (unique) to be added to zoom_meeting_details.
+        $table = new xmldb_table('zoom_meeting_details');
+        $key = new xmldb_key('uuid_unique', XMLDB_KEY_UNIQUE, ['uuid']);
+
+        // Launch add key uuid_unique.
+        $dbman->add_key($table, $key);
+
+        // Define table zoom_meeting_recordings to be created.
+        $table = new xmldb_table('zoom_meeting_recordings');
+
+        // Adding fields to table zoom_meeting_recordings.
+        $table->add_field('id', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, XMLDB_SEQUENCE, null);
+        $table->add_field('recordingid', XMLDB_TYPE_CHAR, '50', null, null, null, null);
+        $table->add_field('meetinguuid', XMLDB_TYPE_CHAR, '30', null, XMLDB_NOTNULL, null, null);
+        $table->add_field('recording_start', XMLDB_TYPE_INTEGER, '11', null, XMLDB_NOTNULL, null, null);
+        $table->add_field('recording_end', XMLDB_TYPE_INTEGER, '11', null, XMLDB_NOTNULL, null, null);
+        $table->add_field('file_type', XMLDB_TYPE_CHAR, '20', null, XMLDB_NOTNULL, null, null);
+        $table->add_field('recording_type', XMLDB_TYPE_CHAR, '50', null, null, null, null);
+        $table->add_field('play_url', XMLDB_TYPE_CHAR, '255', null, null, null, null);
+        $table->add_field('download_url', XMLDB_TYPE_CHAR, '255', null, null, null, null);
+
+        // Adding keys to table zoom_meeting_recordings.
+        $table->add_key('primary', XMLDB_KEY_PRIMARY, ['id']);
+        $table->add_key('meetinguuid_foreign', XMLDB_KEY_FOREIGN, ['meetinguuid'], 'zoom_meeting_details', ['uuid']);
+        $table->add_key('recordingid_unique', XMLDB_KEY_UNIQUE, ['recordingid']);
+
+        // Conditionally launch create table for zoom_meeting_recordings.
+        if (!$dbman->table_exists($table)) {
+            $dbman->create_table($table);
+        }
+
+        // Zoom savepoint reached.
+        upgrade_mod_savepoint(true, 2020053100, 'zoom');
+    }
+
+
     return true;
 }
