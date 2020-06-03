@@ -561,6 +561,12 @@ class mod_zoom_webservice {
         return $uuids;
     }
 
+
+    public function get_meeting_recordings($meetinguuid) {
+        $uuid = $this->encode_uuid($meetinguuid);
+        return $this->_make_call('/meetings/' . $uuid . '/recordings');
+    }
+
     /**
      * If the UUID begins with a ‘/’ or contains ‘//’ in it we need to double encode it when using it for API calls.
      *

@@ -462,7 +462,42 @@ class get_meeting_reports extends \core\task\scheduled_task {
                 $this->debugmsg('Inserted record ' . $recordid);
             }
         }
+
+        try {
+            $recording_types = ['shared_screen_with_speaker_view(CC)', 'shared_screen_with_speaker_view', 'speaker_view',
+                    'shared_screen', 'audio_only'];
+            $recordings = $service->get_meeting_recordings($meeting->uuid);
+            foreach ($recordings->recording_files as $recording) {
+                if (property_exists($recording, 'recording_type') && in_array($recording->recording_type, $recording_types)) {
+                    // With the recording_type set, all those properties should exists.
+                    $record = new \stdClass();
+                    $record->recordingid = property_exists($recording, 'id') ? $recording->id : null;
+                    $record->meetinguuid = $recording->meeting_id;
+                    $record->recording_start = strtotime($recording->recording_start);
+                    $record->recording_end = strtotime($recording->recording_end);
+                    $record->file_type = $recording->file_type;
+                    $record->recording_type = property_exists($recording, 'recording_type') ? $recording->recording_type : null;
+                    $record->play_url = property_exists($recording, 'play_url') ? $recording->play_url : null;
+                    $record->download_url = property_exists($recording, 'download_url') ? $recording->download_url : null;
+
+                    if ($oldrecord = $DB->get_record('zoom_meeting_recordings', ['recordingid' => $recording->id])) {
+                        $record->id = $oldrecord->id;
+                        $nochanges = array_diff_assoc((array) $record, (array) $oldrecord) &&
+                                array_diff_assoc((array) $oldrecord, (array) $record);
+                        if (!$nochanges) {
+                            $DB->update_record('zoom_meeting_recordings', $record);
+                        }
+                    } else {
+                        $DB->insert_record('zoom_meeting_recordings', $record);
+                    }
+                }
+            }
+        } catch (\zoom_not_found_exception $ex) {
+            mtrace(sprintf('Warning: Cannot find meeting %s|%s; skipping', $meeting->meeting_id, $meeting->uuid));
+        }
+
         $this->debugmsg('Finished updating meeting report');
+        return true;
     }
 
     /**

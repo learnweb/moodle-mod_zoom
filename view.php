@@ -71,6 +71,12 @@ try {
     $showrecreate = zoom_is_meeting_gone_error($error);
 }
 
+$sql = "SELECT 'a' FROM {zoom_meeting_recordings} rec " .
+        "JOIN {zoom_meeting_details} d ON rec.meetinguuid = d.uuid " .
+        "WHERE d.meeting_id = :meetingid";
+
+$recordingsexists = $DB->record_exists_sql($sql, ['meetingid' => $zoom->meeting_id]);
+
 $stryes = get_string('yes');
 $strno = get_string('no');
 $strstart = get_string('start_meeting', 'mod_zoom');
@@ -133,6 +139,10 @@ $title = new html_table_cell($link);
 $title->header = true;
 $title->colspan = $numcolumns;
 $table->data[] = array($title);
+
+if ($recordingsexists) {
+    $table->data[] = html_writer::link(new moodle_url('/mod/zoom/recordings.php', array('cmid' => $cm->id)), 'RECORDINGS');
+}
 
 if ($iszoommanager) {
     // Only show sessions link to users with edit capability.
