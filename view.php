@@ -171,7 +171,7 @@ if (!$zoom->webinar) {
     $strhaspass = ($haspassword) ? $stryes : $strno;
     $table->data[] = array($strpassprotect, $strhaspass);
 
-    if ($userishost && $haspassword) {
+    if ($haspassword) {
         $table->data[] = array($strpassword, $zoom->password);
     }
 }
