@@ -159,15 +159,15 @@ class mod_zoom_webservice {
     /**
      * Makes a REST call.
      *
-     * @param string $url The URL to append to the API URL
+     * @param string $path The path to append to the API URL
      * @param array|string $data The data to attach to the call.
      * @param string $method The HTTP method to use.
      * @return stdClass The call's result in JSON format.
      * @throws moodle_exception Moodle exception is thrown for curl errors.
      */
-    protected function _make_call($url, $data = array(), $method = 'get') {
+    protected function _make_call($path, $data = array(), $method = 'get') {
         global $CFG;
-        $url = self::API_URL . $url;
+        $url = self::API_URL . $path;
         $method = strtolower($method);
         $proxyhost = get_config('mod_zoom', 'proxyhost');
         $cfg = new stdClass();
@@ -226,8 +226,10 @@ class mod_zoom_webservice {
                     if ($this->makecallretries > self::MAX_RETRIES) {
                         throw new zoom_api_retry_failed_exception($response->message, $response->code);
                     }
-                    $curlinfo = $curl->get_info();
-                    $timediff = array_key_exists('Retry-After', $curlinfo) ? (strtotime($curlinfo['Retry-After']) - time()) : 1;
+                    $header = $curl->getResponse();
+                    // Header can have mixed case, normalize it.
+                    $header = array_change_key_case($header, CASE_LOWER);
+                    $timediff = array_key_exists('retry-after', $header) ? (strtotime($header['retry-after']) - time()) : 1;
                     if ($timediff > self::MAX_RETRY_WAIT) {
                         throw new zoom_api_retry_failed_exception($response->message, $response->code);
                     }
@@ -236,7 +238,7 @@ class mod_zoom_webservice {
                     if ($timediff > 0) {
                         sleep($timediff);
                     }
-                    return $this->_make_call($url, $data, $method);
+                    return $this->_make_call($path, $data, $method);
                 default:
 
 		    if ($response) {
@@ -277,17 +279,7 @@ class mod_zoom_webservice {
         do {
             $callresult = null;
             $moredata = false;
-            if ($isreportcall) {
-                $numcalls = get_config('mod_zoom', 'calls_left');
-                if ($numcalls > 0) {
-                    $callresult = $this->_make_call($url, $data);
-                    set_config('calls_left', $numcalls - 1, 'mod_zoom');
-                    // We can only do 1 report calls a second.
-                    sleep(1);
-                }
-            } else {
-                $callresult = $this->_make_call($url, $data);
-            }
+            $callresult = $this->_make_call($url, $data);
 
             if ($callresult) {
                 $aggregatedata = array_merge($aggregatedata, $callresult->$datatoget);
@@ -473,7 +465,7 @@ class mod_zoom_webservice {
             )
         );
         if (isset($zoom->intro)) {
-            $data['agenda'] = strip_tags($zoom->intro);
+            $data['agenda'] = $zoom->intro;
         }
         if (isset($CFG->timezone) && !empty($CFG->timezone)) {
             $data['timezone'] = $CFG->timezone;
@@ -564,7 +556,7 @@ class mod_zoom_webservice {
      * @return void
      */
     public function delete_meeting($id, $webinar) {
-        $url = ($webinar ? 'webinars/' : 'meetings/') . $id;
+        $url = ($webinar ? 'webinars/' : 'meetings/') . $id . '?schedule_for_reminder=false';
         $this->_make_call($url, null, 'delete');
     }
 
@@ -582,6 +574,24 @@ class mod_zoom_webservice {
             $response = $this->_make_call($url);
         } catch (moodle_exception $error) {
             throw $error;
+        }
+        return $response;
+    }
+
+    /**
+     * Get the meeting invite note that was sent for a specific meeting from Zoom.
+     *
+     * @param int $id The meeting_id of the meeting to retrieve.
+     * @return stdClass The meeting's invite note.
+     * @link https://marketplace.zoom.us/docs/api-reference/zoom-api/meetings/meetinginvitation
+     */
+    public function get_meeting_invitation($id) {
+        $url = 'meetings/' . $id . '/invitation';
+        $response = null;
+        try {
+            $response = $this->_make_call($url);
+        } catch (moodle_exception $error) {
+            debugging($error->getMessage());
         }
         return $response;
     }

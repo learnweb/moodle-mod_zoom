@@ -99,7 +99,7 @@ class zoom_bad_request_exception extends moodle_exception {
     public function __construct($response, $errorcode) {
         $this->response = $response;
         $this->zoomerrorcode = $errorcode;
-        parent::__construct('errorwebservice_badrequest', 'mod_zoom');
+        parent::__construct('errorwebservice_badrequest', 'mod_zoom', '', $response);
     }
 }
 
@@ -246,7 +246,36 @@ function zoom_get_sessions_for_display($meetingid) {
         $uuid = $instance->uuid;
         $participantlist = zoom_get_participants_report($instance->id);
         $sessions[$uuid]['participants'] = $participantlist;
-        $sessions[$uuid]['count'] = count($participantlist);
+
+        $uniquevalues = [];
+        $uniqueparticipantcount = 0;
+        foreach ($participantlist as $participant) {
+            $unique = true;
+            if ($participant->uuid != null) {
+                if (array_key_exists($participant->uuid, $uniquevalues)) {
+                    $unique = false;
+                } else {
+                    $uniquevalues[$participant->uuid] = true;
+                }
+            }
+            if ($participant->userid != null) {
+                if (!$unique || !array_key_exists($participant->userid, $uniquevalues)) {
+                    $uniquevalues[$participant->userid] = true;
+                } else {
+                    $unique = false;
+                }
+            }
+            if ($participant->user_email != null) {
+                if (!$unique || !array_key_exists($participant->user_email, $uniquevalues)) {
+                    $uniquevalues[$participant->user_email] = true;
+                } else {
+                    $unique = false;
+                }
+            }
+            $uniqueparticipantcount += $unique ? 1 : 0;
+        }
+
+        $sessions[$uuid]['count'] = $uniqueparticipantcount;
         $sessions[$uuid]['topic'] = $instance->topic;
         $sessions[$uuid]['duration'] = $instance->duration;
         $sessions[$uuid]['starttime'] = userdate($instance->start_time, $format);

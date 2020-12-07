@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/ucla/moodle-mod_zoom.svg?branch=master)](https://travis-ci.org/github/ucla/moodle-mod_zoom/branches)
+[![Build Status](https://travis-ci.com/ucla/moodle-mod_zoom.svg?branch=master)](https://travis-ci.com/github/ucla/moodle-mod_zoom/branches)
 
 # Intro
 
@@ -27,6 +27,12 @@ See https://marketplace.zoom.us/docs/guides/build/jwt-app. You will need to crea
 Please note that the API key and secret is not the same as the LTI key/secret.
 
 ## Changelog
+
+v3.3
+
+- Fixed problems with error handling (Thanks kbowlerarden and jrchamp)
+- Added language translations for uk, pl, and ru (Thanks mkikets99)
+- Thanks to kubilayagi for all his work on the Zoom plugin these past 2.5 years and good luck on future endevors
 
 v3.2
 
