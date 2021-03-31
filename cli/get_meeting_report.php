@@ -70,6 +70,7 @@ if (!empty($options['hostuuid'])) {
     $hostuuids = $DB->get_fieldset_select('zoom', 'DISTINCT host_id', 'course=:courseid',
             array('courseid' => $options['courseid']));
     if (empty($hostuuids)) {
+        cli_writeln(get_string('nozoomsfound', 'mod_zoom'));
         cli_error('No hosts found for course');
     }
 }
@@ -79,3 +80,5 @@ set_debugging(DEBUG_DEVELOPER, true);
 
 $meetingtask = new mod_zoom\task\get_meeting_reports();
 $meetingtask->execute($options['start'], $options['end'], $hostuuids);
+
+cli_writeln('DONE!');
