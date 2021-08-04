@@ -42,6 +42,10 @@ define('ZOOM_SCHEDULED_MEETING', 2);
 define('ZOOM_RECURRING_MEETING', 3);
 define('ZOOM_SCHEDULED_WEBINAR', 5);
 define('ZOOM_RECURRING_WEBINAR', 6);
+// Meeting status.
+define('ZOOM_MEETING_EXPIRED', 0);
+define('ZOOM_MEETING_EXISTS', 1);
+
 // Number of meetings per page from zoom's get user report.
 define('ZOOM_DEFAULT_RECORDS_PER_CALL', 30);
 define('ZOOM_MAX_RECORDS_PER_CALL', 300);
@@ -582,8 +586,10 @@ function zoom_get_selectable_alternative_hosts_list(context $context) {
         // At least, Zoom does not care if the user who is the host adds himself as alternative host as well.
 
         // Verify that the user really has a Zoom account.
+        // Furthermore, verify that the user's status is active. Adding a pending or inactive user as alternative host will result
+        // in a Zoom API error otherwise.
         $zoomuser = $service->get_user($u->email);
-        if ($zoomuser !== false) {
+        if ($zoomuser !== false && $zoomuser->status === 'active') {
             // Add user to array of users.
             $selectablealternativehosts[$u->email] = fullname($u);
         }
@@ -667,7 +673,7 @@ function zoom_get_nonusers_from_alternativehosts(array $alternativehosts) {
  *
  * @return string The unavailability note.
  */
-function zoom_get_unavailability_note(object $zoom, $finished = null) {
+function zoom_get_unavailability_note($zoom, $finished = null) {
     // Get config.
     $config = get_config('zoom');
 
@@ -713,7 +719,7 @@ function zoom_get_unavailability_note(object $zoom, $finished = null) {
  * @param string $zoomhostid The Zoom ID of the host.
  * @param boolean $iswebinar The meeting is a webinar.
  *
- * @return int|false The meeting capacity of the Zoom user or false if the user does not have any meeting capacity at all.
+ * @return int|boolean The meeting capacity of the Zoom user or false if the user does not have any meeting capacity at all.
  */
 function zoom_get_meeting_capacity(string $zoomhostid, bool $iswebinar = false) {
     // Get Zoom API service instance.
@@ -742,7 +748,7 @@ function zoom_get_meeting_capacity(string $zoomhostid, bool $iswebinar = false) 
             return false;
         }
 
-        // Check if the user has a 'large_meeting' license and, if yes, if this is bigger than the given 'meeting_capacity' value;
+        // Check if the user has a 'large_meeting' license and, if yes, if this is bigger than the given 'meeting_capacity' value.
         if ($userfeatures->large_meeting === true &&
                 isset($userfeatures->large_meeting_capacity) &&
                 is_int($userfeatures->large_meeting_capacity) != false &&
@@ -775,4 +781,21 @@ function zoom_get_eligible_meeting_participants(context $context) {
     $eligibleparticipantcount = $DB->count_records_sql($sql, $sqlsnippets->params);
 
     return $eligibleparticipantcount;
+}
+
+/**
+ * Get array of alternative hosts from a string.
+ *
+ * @param string $alternativehoststring Comma (or semicolon) separated list of alternative hosts.
+ * @return string[] $alternativehostarray Array of alternative hosts.
+ */
+function zoom_get_alternative_host_array_from_string($alternativehoststring) {
+    if (empty($alternativehoststring)) {
+        return array();
+    }
+
+    // The Zoom API has historically returned either semicolons or commas, so we need to support both.
+    $alternativehoststring = str_replace(';', ',', $alternativehoststring);
+    $alternativehostarray = array_filter(explode(',', $alternativehoststring));
+    return $alternativehostarray;
 }
