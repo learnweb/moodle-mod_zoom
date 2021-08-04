@@ -88,6 +88,7 @@ function zoom_add_instance(stdClass $zoom, mod_zoom_mod_form $mform = null) {
 
     $response = $service->create_meeting($zoom);
     $zoom = populate_zoom_from_response($zoom, $response);
+    $zoom->timemodified = time();
     if (!empty($zoom->schedule_for)) {
         // Wait until after receiving a successful response from zoom to update the host
         // based on the schedule_for field. Zoom handles the schedule for on their
@@ -220,7 +221,6 @@ function populate_zoom_from_response(stdClass $zoom, stdClass $response) {
     if (isset($response->settings->waiting_room)) {
         $newzoom->option_waiting_room = $response->settings->waiting_room;
     }
-    $newzoom->timemodified = time();
 
     return $newzoom;
 }
@@ -247,7 +247,7 @@ function zoom_delete_instance($id) {
     require_once($CFG->dirroot.'/mod/zoom/locallib.php');
 
     // If the meeting is missing from zoom, don't bother with the webservice.
-    if ($zoom->exists_on_zoom) {
+    if ($zoom->exists_on_zoom == ZOOM_MEETING_EXISTS) {
         $service = new mod_zoom_webservice();
         try {
             $service->delete_meeting($zoom->meeting_id, $zoom->webinar);

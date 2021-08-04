@@ -84,8 +84,6 @@ class get_meeting_reports extends \core\task\scheduled_task {
      * @param array $hostuuids      If passed, will find only meetings for given array of host uuids.
      */
     public function execute($paramstart = null, $paramend = null, $hostuuids = null) {
-        global $CFG, $DB;
-
         $config = get_config('zoom');
         if (empty($config->apikey)) {
             mtrace('Skipping task - ', get_string('zoomerr_apikey_missing', 'zoom'));
@@ -156,14 +154,14 @@ class get_meeting_reports extends \core\task\scheduled_task {
 
         // Sort all meetings based on end_time so that we know where to pick
         // up again if we run out of API calls.
-        $allmeetings = array_map([get_class(), 'normalize_meeting'], $allmeetings);
-        usort($allmeetings, [get_class(), 'cmp']);
+        $allmeetings = array_map([$this, 'normalize_meeting'], $allmeetings);
+        usort($allmeetings, [$this, 'cmp']);
 
         mtrace("Processing " . count($allmeetings) . " meetings");
 
         foreach ($allmeetings as $meeting) {
             // Only process meetings if they happened after the time we left off.
-            $meetingtime = strtotime($meeting->end_time);
+            $meetingtime = ($meeting->end_time == intval($meeting->end_time)) ? $meeting->end_time : strtotime($meeting->end_time);
             if ($runningastask && $meetingtime <= $starttime) {
                 continue;
             }

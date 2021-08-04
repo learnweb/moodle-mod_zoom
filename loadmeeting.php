@@ -39,6 +39,9 @@ if ($id) {
 } else {
     print_error('You must specify a course_module ID');
 }
+$userisrealhost = (zoom_get_user_id(false) === $zoom->host_id);
+$alternativehosts = zoom_get_alternative_host_array_from_string($zoom->alternative_hosts);
+$userishost = ($userisrealhost || in_array($USER->email, $alternativehosts, true));
 
 require_login($course, true, $cm);
 
@@ -66,7 +69,8 @@ if ($available !== true) {
     redirect($unavailabilityurl, $unavailabilitynote, null, \core\output\notification::NOTIFY_ERROR);
 }
 
-if ($userishost) {
+if ($userisrealhost) {
+    // Important: Only the real host can use this URL, because it joins the meeting as the host user.
     $nexturl = new moodle_url($zoom->start_url);
 } else {
     // Check whether user had a grade. If no, then assign full credits to him or her.

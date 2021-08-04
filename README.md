@@ -32,6 +32,32 @@ server is properly synchronized with the time servers.
 
 ## Changelog
 
+v3.8.1
+
+- Only allow real host to use start_url #285 (thanks @abias for reporting)
+
+v3.8
+
+- Add support for Ionic 5 #269 (thanks @dpalou)
+- Improve update_meetings scheduled task #263 (thanks @abias)
+- Re-enable mustache continuous integration #276
+- Treat alternative hosts as a possible host #275
+- Update `exists_on_zoom` consistently #273 (thanks @abias for reporting)
+- Update `timemodified` only when needed #279 (thanks @abias for reporting)
+- Fix meeting invitation issues #267, #274 (thanks @abias, @nstefanski, @andrewmadden for feedback)
+
+v3.7
+
+- Allow administrators to selectively remove Meeting Invitation details #235 (thanks @andrewmadden)
+  - New capabilities `mod/zoom:viewjoinurl` and `mod/zoom:viewdialin`
+- Track completion for mobile users #238 (thanks @nstefanski, @tzerafnx)
+- Fix backup and restore of several zoom activity-level fields #247 (thanks @abias)
+- Fix meeting reports task for some already-numeric end times #236 (thanks @lcollong)
+- Fix list of alternative hosts to only include active users #252 (thanks @abias)
+- Fix PHP 7.1 compatibility issue #243
+- Fix encryption type validation #232 (thanks @abias)
+- Clean up error messages / efficiency on the view page #245 (thanks @abias)
+
 v3.6
 
 - Fixed fatal regression on settings.php for Moodle < 3.7 (Thanks abias)
