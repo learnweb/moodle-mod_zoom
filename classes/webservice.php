@@ -273,8 +273,7 @@ class mod_zoom_webservice {
                     }
                     return $this->make_call($path, $data, $method);
                 default:
-
-		    if ($response) {
+                    if ($response) {
                         if ($response->code = 1001) {
                             throw new moodle_exception('errornotregistered', 'mod_zoom', '', $response->message);
                         } else {
@@ -282,8 +281,8 @@ class mod_zoom_webservice {
                             $exception->response = $response->message;
                             $exception->zoomerrorcode = $response->code;
                             throw $exception;
-			}
-		    } else {
+                        }
+                    } else {
                         throw new moodle_exception('errorwebservice', 'mod_zoom', '', "HTTP Status $httpstatus");
                     }
             }
